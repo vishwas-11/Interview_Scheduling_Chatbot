@@ -13,4 +13,4 @@ db = client[os.getenv("DB_NAME")]
 
 users = db["users"]
 interviews = db["interviews"]
-messages = db["messages"]
+conversations = db["conversations"]

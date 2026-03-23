@@ -15,7 +15,7 @@ def create_event(user_id, slot):
     return str(interviews.insert_one(doc).inserted_id)
 
 
-# ✅ ADD THIS
+
 def calendar_update_tool(event_id: str, new_slot: str):
     interviews.update_one(
         {"_id": ObjectId(event_id)},
@@ -24,7 +24,7 @@ def calendar_update_tool(event_id: str, new_slot: str):
     return {"status": "updated", "event_id": event_id}
 
 
-# ✅ ADD THIS
+
 def calendar_delete_tool(event_id: str):
     interviews.delete_one({"_id": ObjectId(event_id)})
     return {"status": "deleted", "event_id": event_id}

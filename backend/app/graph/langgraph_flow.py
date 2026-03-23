@@ -1,30 +1,3 @@
-# from langgraph.graph import StateGraph
-# from app.agents.intent_agent import detect_intent
-# from app.agents.conversation_agent import conversation_agent
-# from app.agents.availability_agent import availability_agent
-# from app.agents.scheduling_agent import scheduling_agent
-
-
-# def run_flow(user_id, message):
-#     intent = detect_intent(message)
-
-#     if "schedule" in intent:
-#         convo = conversation_agent(user_id, message)
-#         slots = availability_agent()
-#         event = scheduling_agent(user_id, slots[0])
-
-#         return {
-#             "intent": intent,
-#             "reply": convo,
-#             "slots": slots,
-#             "event": event
-#         }
-
-#     return {"intent": intent}
-
-
-
-
 from langgraph.graph import StateGraph, END
 
 from app.graph.state import GraphState
@@ -35,6 +8,13 @@ from app.agents.availability_agent import availability_node
 from app.agents.scheduling_agent import scheduling_node
 from app.agents.reschedule_agent import reschedule_node
 from app.agents.cancellation_agent import cancel_node
+
+
+#  Decide what to do AFTER conversation
+def route_after_conversation(state):
+    if state.get("intent") == "schedule_ready":
+        return "availability"
+    return "end"
 
 
 def route_intent(state):
@@ -64,7 +44,7 @@ def build_graph():
     # Entry
     builder.set_entry_point("intent")
 
-    # Routing
+    # Intent routing
     builder.add_conditional_edges(
         "intent",
         route_intent,
@@ -75,8 +55,17 @@ def build_graph():
         }
     )
 
-    # Normal flow
-    builder.add_edge("conversation", "availability")
+    #  NO LOOP HERE
+    builder.add_conditional_edges(
+        "conversation",
+        route_after_conversation,
+        {
+            "availability": "availability",
+            "end": END
+        }
+    )
+
+    # Scheduling flow
     builder.add_edge("availability", "schedule")
     builder.add_edge("schedule", END)
 
@@ -90,16 +79,27 @@ def build_graph():
 graph = build_graph()
 
 
-def run_flow(user_id: str, message: str):
-    state : GraphState = {
-        "user_id": user_id,
-        "message": message,
-        "intent": None,
-        "response": None,
-        "slots": None,
-        "selected_slot": None,
-        "event_id": None
-    }
+def run_flow(user_id: str, message: str, prev_state: dict = None):
+
+    #  merge previous state
+    if prev_state:  
+        state = {
+            **prev_state,
+            "message": message
+        }
+    else:
+        state: GraphState = {
+            "user_id": user_id,
+            "message": message,
+            "intent": None,
+            "response": None,
+            "slots": None,
+            "selected_slot": None,
+            "event_id": None,
+            "date": None,
+            "time": None,
+            "confirmed": None
+        }
 
     result = graph.invoke(state)
 
