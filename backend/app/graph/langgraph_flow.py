@@ -1,119 +1,6 @@
-# from langgraph.graph import StateGraph, END
-
-# from app.graph.state import GraphState
-
-# from app.agents.intent_agent import intent_node
-# from app.agents.conversation_agent import conversation_node
-# from app.agents.availability_agent import availability_node
-# from app.agents.scheduling_agent import scheduling_node
-# from app.agents.reschedule_agent import reschedule_node
-# from app.agents.cancellation_agent import cancel_node
-
-
-# #  Decide what to do AFTER conversation
-# def route_after_conversation(state):
-#     if state.get("intent") == "schedule_ready":
-#         return "availability"
-#     return "end"
-
-
-# def route_intent(state):
-#     intent = state["intent"]
-
-#     if "schedule" in intent:
-#         return "conversation"
-#     elif "reschedule" in intent:
-#         return "reschedule"
-#     elif "cancel" in intent:
-#         return "cancel"
-#     else:
-#         return "conversation"
-
-
-# def build_graph():
-#     builder = StateGraph(GraphState)
-
-#     # Nodes
-#     builder.add_node("intent", intent_node)
-#     builder.add_node("conversation", conversation_node)
-#     builder.add_node("availability", availability_node)
-#     builder.add_node("schedule", scheduling_node)
-#     builder.add_node("reschedule", reschedule_node)
-#     builder.add_node("cancel", cancel_node)
-
-#     # Entry
-#     builder.set_entry_point("intent")
-
-#     # Intent routing
-#     builder.add_conditional_edges(
-#         "intent",
-#         route_intent,
-#         {
-#             "conversation": "conversation",
-#             "reschedule": "reschedule",
-#             "cancel": "cancel"
-#         }
-#     )
-
-#     #  NO LOOP HERE
-#     builder.add_conditional_edges(
-#         "conversation",
-#         route_after_conversation,
-#         {
-#             "availability": "availability",
-#             "end": END
-#         }
-#     )
-
-#     # Scheduling flow
-#     builder.add_edge("availability", "schedule")
-#     builder.add_edge("schedule", END)
-
-#     # Other flows
-#     builder.add_edge("reschedule", END)
-#     builder.add_edge("cancel", END)
-
-#     return builder.compile()
-
-
-# graph = build_graph()
-
-
-# def run_flow(user_id: str, message: str, prev_state: dict = None):
-
-#     #  merge previous state
-#     if prev_state:  
-#         state = {
-#             **prev_state,
-#             "message": message
-#         }
-#     else:
-#         state: GraphState = {
-#             "user_id": user_id,
-#             "message": message,
-#             "intent": None,
-#             "response": None,
-#             "slots": None,
-#             "selected_slot": None,
-#             "event_id": None,
-#             "date": None,
-#             "time": None,
-#             "complete": None
-#         }
-
-#     result = graph.invoke(state)
-
-#     return result
-
-
-
-
-
-
 from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 
-from app.agents.intent_agent import intent_node
 from app.agents.conversation_agent import conversation_node
 from app.agents.availability_agent import availability_node
 from app.agents.scheduling_agent import scheduling_node
@@ -121,66 +8,51 @@ from app.agents.reschedule_agent import reschedule_node
 from app.agents.cancellation_agent import cancel_node
 
 
-def route_intent(state):
-    intent = state.get("intent", "")
+def route_from_llm(state):
+    intent = state.get("intent")
+    complete = state.get("complete")
 
-    if "schedule" in intent:
-        return "conversation"
-    elif "reschedule" in intent:
+    # If still gathering info → STOP (wait for user next turn)
+    if not complete:
+        return "end"
+
+    if intent == "schedule":
+        return "availability"
+
+    elif intent == "reschedule":
         return "reschedule"
-    elif "cancel" in intent:
+
+    elif intent == "cancel":
         return "cancel"
-    else:
-        return "conversation"
 
-
-def check_complete(state):
-    if not state.get("complete"):
-        return "conversation"
-
-    return "availability"
+    return "end"
 
 
 def build_graph():
     builder = StateGraph(GraphState)
 
     # Nodes
-    builder.add_node("intent", intent_node)
     builder.add_node("conversation", conversation_node)
     builder.add_node("availability", availability_node)
     builder.add_node("schedule", scheduling_node)
     builder.add_node("reschedule", reschedule_node)
     builder.add_node("cancel", cancel_node)
 
-    # Entry
-    builder.set_entry_point("intent")
+    builder.set_entry_point("conversation")
 
-    # Intent routing
-    builder.add_conditional_edges(
-        "intent",
-        route_intent,
-        {
-            "conversation": "conversation",
-            "reschedule": "reschedule",
-            "cancel": "cancel"
-        }
-    )
-
-    # Conversation loop (LLM controlled)
     builder.add_conditional_edges(
         "conversation",
-        check_complete,
+        route_from_llm,
         {
-            "conversation": "conversation",
-            "availability": "availability"
+            "availability": "availability",
+            "reschedule": "reschedule",
+            "cancel": "cancel",
+            "end": END,
         }
     )
 
-    # Main flow
     builder.add_edge("availability", "schedule")
     builder.add_edge("schedule", END)
-
-    # Other flows
     builder.add_edge("reschedule", END)
     builder.add_edge("cancel", END)
 
@@ -191,11 +63,10 @@ graph = build_graph()
 
 
 def run_flow(user_id: str, message: str, prev_state: dict = None):
-    # Merge previous state if exists
+    # Default blank state
     state: GraphState = {
         "user_id": user_id,
         "message": message,
-
         "intent": None,
         "response": None,
         "date": None,
@@ -203,13 +74,24 @@ def run_flow(user_id: str, message: str, prev_state: dict = None):
         "complete": False,
         "slots": None,
         "selected_slot": None,
-        "event_id": None
+        "event_id": None,
     }
 
-    # Merge memory (VERY IMPORTANT)
     if prev_state:
-        state = {**prev_state, "message": message}
+        # Build merged state explicitly — avoids Pylance TypedDict unpacking error
+        # GraphState() constructor call satisfies strict type checking
+        state = GraphState(
+            user_id=user_id,
+            message=message,                                # always use new message
+            intent=prev_state.get("intent"),                # preserve across turns
+            response=None,                                  # reset each turn
+            date=prev_state.get("date"),                    # preserve across turns
+            time=prev_state.get("time"),                    # preserve across turns
+            complete=False,                                 # re-evaluate each turn
+            slots=prev_state.get("slots"),                  # preserve
+            selected_slot=prev_state.get("selected_slot"),  # preserve
+            event_id=prev_state.get("event_id"),            # preserve
+        )
 
     result = graph.invoke(state, {"recursion_limit": 20})
-
     return result

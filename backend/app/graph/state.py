@@ -15,3 +15,4 @@ class GraphState(TypedDict):
     slots: Optional[List[str]]
     selected_slot: Optional[str]
     event_id: Optional[str]
+    

@@ -19,16 +19,16 @@ def get_user(authorization: str = Header(...)):
 @router.post("/chat")
 def chat(data: ChatRequest, user_id=Depends(get_user)):
 
-    #  STEP 1: Load previous state
+    # STEP 1: Load previous state (preserves date, time, intent across turns)
     prev_state = get_user_state(user_id)
 
-    #  STEP 2: Run flow
+    # STEP 2: Run flow with accumulated state
     result = run_flow(user_id, data.message, prev_state)
 
-    #  STEP 3: Save updated state
+    # STEP 3: Save updated state for next turn
     save_user_state(user_id, result)
 
-    #  STEP 4: If completed → clear memory
+    # STEP 4: If scheduling completed → clear memory so next convo starts fresh
     if result.get("event_id"):
         clear_user_state(user_id)
 

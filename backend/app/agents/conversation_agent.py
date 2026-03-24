@@ -1,96 +1,125 @@
+# from app.llm.llm_extractor import extract_with_llm
 # from app.agents.intent_agent import llm
-# import re
-
-
-# def extract_info(message: str):
-#     date = None
-#     time = None
-
-#     msg = message.lower()
-
-#     #  Date extraction
-#     if "tomorrow" in msg:
-#         date = "tomorrow"
-
-#     #  Time extraction (handles 10am, 2pm, 14:00 etc)
-#     time_match = re.search(r"\b(\d{1,2})(:\d{2})?\s?(am|pm)?\b", msg)
-
-#     if time_match:
-#         hour = int(time_match.group(1))
-#         minute = time_match.group(2) if time_match.group(2) else ":00"
-#         meridian = time_match.group(3)
-
-#         if meridian == "pm" and hour != 12:
-#             hour += 12
-#         if meridian == "am" and hour == 12:
-#             hour = 0
-
-#         time = f"{hour:02d}{minute}"
-
-#     return date, time
+# import json
 
 # def conversation_node(state):
-#     message = state["message"]
 
-#     extracted_date, extracted_time = extract_info(message)
+#     # STEP 1: Extract structured data
+#     llm_data = extract_with_llm(state)
 
-#     # merge with existing state
-#     date = extracted_date or state.get("date")
-#     time = extracted_time or state.get("time")
+#     intent = llm_data.get("intent")
+#     date = llm_data.get("date")
+#     time = llm_data.get("time")
+#     complete = llm_data.get("complete")
 
-#     #  Missing both → ask user and STOP
-#     if not date and not time:
-#         return {
-#             **state,
-#             "response": "Please provide date and time for the interview.",
-#             "date": None,
-#             "time": None,
-#             "intent": "incomplete"
-#         }
+#     # STEP 2: Build SMART conversational prompt
+#     prompt = f"""
+# You are a smart AI interview scheduling assistant.
 
-#     #  Missing date
-#     if not date:
-#         return {
-#             **state,
-#             "response": "Which date would you like?",
-#             "date": None,
-#             "time": time,
-#             "intent": "incomplete"
-#         }
+# Conversation state:
+# - intent: {intent}
+# - date: {date}
+# - time: {time}
+# - complete: {complete}
 
-#     #  Missing time
-#     if not time:
-#         return {
-#             **state,
-#             "response": "What time works for you?",
-#             "date": date,
-#             "time": None,
-#             "intent": "incomplete"
-#         }
+# User message:
+# "{state.get("message")}"
 
-#     #  All info available → proceed
+# Your job:
+# - Respond naturally like a human assistant
+# - If details are missing → ask for them
+# - If complete → confirm scheduling clearly
+# - Be short, professional, and helpful
+
+# Examples:
+# - Missing date → "Sure! What date would you prefer?"
+# - Missing time → "Got it. What time works for you?"
+# - Complete → "Great! Your interview is scheduled on {date} at {time}"
+
+# Return ONLY a natural response text.
+# """
+
+#     res = llm.invoke(prompt)
+
+#     content = res.content
+#     if isinstance(content, list):
+#         content = content[0].get("text", "")
+
+#     response = content.strip()
+
 #     return {
 #         **state,
+#         "intent": intent,
 #         "date": date,
 #         "time": time,
-#         "intent": "schedule_ready"
+#         "complete": complete,
+#         "response": response
 #     }
 
 
 
+
+
+
+
 from app.llm.llm_extractor import extract_with_llm
+from app.agents.intent_agent import llm
 
 
 def conversation_node(state):
-    message = state["message"]
 
-    llm_data = extract_with_llm(message)
+    # STEP 1: Extract structured data
+    llm_data = extract_with_llm(state)
+
+    intent = llm_data.get("intent")
+    date = llm_data.get("date")
+    time = llm_data.get("time")
+    complete = llm_data.get("complete")
+
+    # STEP 2: Build SMART conversational prompt
+    prompt = f"""
+You are a smart AI interview scheduling assistant.
+
+Conversation state:
+- intent: {intent}
+- date: {date}
+- time: {time}
+- complete: {complete}
+
+User message:
+"{state.get("message")}"
+
+Your job:
+- Respond naturally like a human assistant
+- If date is missing → ask specifically for the date
+- If time is missing → ask specifically for the time
+- If both are present (complete = true) → confirm scheduling clearly
+- Be short, professional, and helpful
+
+Examples:
+- intent=schedule, date=None, time=None → "Sure! What date would you prefer for the interview?"
+- intent=schedule, date=set, time=None → "Got it. What time works for you?"
+- intent=schedule, date=None, time=set → "Great! And what date would you like?"
+- intent=schedule, complete=True → "Your interview is scheduled on {date} at {time}. See you then!"
+- intent=cancel → "Got it, I'll cancel your interview. Can you confirm your name or booking ID?"
+- intent=reschedule → "Sure! What new date and time would work for you?"
+
+Return ONLY the response text, no JSON, no extra formatting.
+"""
+
+    res = llm.invoke(prompt)
+
+    content = res.content
+    if isinstance(content, list):
+        content = content[0].get("text", "")
+
+    response = content.strip()
 
     return {
         **state,
-        "intent": llm_data.get("intent"),
-        "date": llm_data.get("date"),
-        "time": llm_data.get("time"),
-        "response": llm_data.get("response"),
-        "complete": llm_data.get("complete")
+        "intent": intent,
+        "date": date,
+        "time": time,
+        "complete": complete,
+        "response": response,
     }
