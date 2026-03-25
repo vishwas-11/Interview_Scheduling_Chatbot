@@ -52,7 +52,7 @@
 
 
 import { useState } from 'react'
-import StatusBar from './StatusBar'
+import StatusBar from './Statusbar'
 import Timeline from './Timeline'
 import ToolInspector from './ToolInspector'
 import CalendarView from './CalendarView'
