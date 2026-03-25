@@ -1,38 +1,71 @@
-// import { Link } from 'react-router-dom'
+// import React from 'react';
+// import LineWaves from '../components/layout/LineWaves'; 
+// import Navbar from '../components/layout/Navbar';
 
 // export default function LandingPage() {
 //   return (
-//     <div className="min-h-screen bg-navy-950 flex flex-col items-center justify-center px-4 relative overflow-hidden">
-//       {/* Background Glows */}
-//       <div className="absolute top-0 left-1/4 w-96 h-96 bg-electric-500/10 rounded-full blur-[120px]" />
-//       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px]" />
+//     <div className="relative w-full h-screen overflow-hidden bg-[#050505]">
+      
+//       {/* 1. The Shader Background */}
+//       <div className="absolute inset-0 z-0">
+//         <LineWaves 
+//           speed={0.25}
+//           innerLineCount={35}
+//           outerLineCount={40}
+//           warpIntensity={1.0}
+//           rotation={-45}
+//           color1="#6366f1" // Indigo
+//           color2="#a855f7" // Purple
+//           color3="#ec4899" // Pink
+//           brightness={0.2}
+//           enableMouseInteraction={true}
+//           mouseInfluence={2.0}
+//         />
+//       </div>
 
-//       <div className="relative z-10 text-center max-w-3xl">
-//         <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-electric-500/30 bg-electric-500/5 text-electric-400 text-xs font-mono tracking-widest uppercase">
-//           Now in Private Beta
+//       {/* 2. Overlays */}
+//       <div className="absolute inset-0 z-10 bg-black/30 pointer-events-none" />
+
+//       {/* 3. Navbar (Styled below) */}
+//       <Navbar />
+
+//       {/* 4. Content Layer */}
+//       <main className="relative z-20 flex flex-col items-center justify-center h-full px-4 text-center pointer-events-none">
+//         {/* Badge */}
+//         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-indigo-300 mb-8 backdrop-blur-sm pointer-events-auto">
+//           <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+//           AI-Driven Coordination
 //         </div>
-//         <h1 className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight mb-6">
-//           Interviewing <br />
-//           <span className="text-electric-500">Reimagined.</span>
+
+//         <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 text-white drop-shadow-2xl">
+//           Hire at the speed <br/>
+//           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
+//             of intelligence.
+//           </span>
 //         </h1>
-//         <p className="text-slate-400 text-lg mb-10 leading-relaxed max-w-xl mx-auto">
-//           The AI-powered assistant that handles your scheduling, 
-//           prep, and feedback in one seamless workflow.
+        
+//         <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 drop-shadow-md leading-relaxed">
+//           The autonomous scheduling engine that syncs calendars, screens candidates, 
+//           and books interviews without a single back-and-forth email.
 //         </p>
-//         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-//           <Link 
-//             to="/login" 
-//             className="px-8 py-4 bg-electric-500 hover:bg-electric-400 text-white font-bold rounded-2xl transition-all shadow-lg shadow-electric-500/20 active:scale-95"
+        
+//         <div className="flex flex-col sm:flex-row gap-4 pointer-events-auto">
+//           <button 
+//             onClick={() => window.location.href = '/login'}
+//             className="px-10 py-4 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-500 hover:scale-105 transition-all shadow-lg shadow-indigo-500/20"
 //           >
 //             Get Started Free
-//           </Link>
-//           <button className="px-8 py-4 bg-navy-900 border border-navy-700 text-white font-bold rounded-2xl hover:bg-navy-800 transition-all active:scale-95">
-//             Watch Demo
+//           </button>
+//           <button className="px-10 py-4 bg-white/5 border border-white/10 text-white font-bold rounded-full hover:bg-white/10 transition-all backdrop-blur-md">
+//             View Demo
 //           </button>
 //         </div>
-//       </div>
+//       </main>
+
+//       {/* Bottom Gradient Fade */}
+//       <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 //     </div>
-//   )
+//   );
 // }
 
 
@@ -40,45 +73,73 @@
 
 
 
-import { Link } from 'react-router-dom'
+
+
+import React from 'react';
+import LineWaves from '../components/layout/LineWaves'; 
+import Navbar from '../components/layout/Navbar';
 
 export default function LandingPage() {
+  const handleAuthRedirect = () => {
+    window.location.href = '/login';
+  };
+
   return (
-    /* Using [#0a0a23] for your Navy-950 and [relative] to ensure children stay on top */
-    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden bg-[#050505]">
       
-      {/* Background Glows - Using arbitrary values for the blur and color */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-electric-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* 1. The Shader Background */}
+      <div className="absolute inset-0 z-0">
+        <LineWaves 
+          speed={0.25}
+          innerLineCount={35}
+          outerLineCount={40}
+          warpIntensity={1.0}
+          rotation={-45}
+          color1="#6366f1" 
+          color2="#a855f7" 
+          color3="#ec4899" 
+          brightness={0.2}
+          enableMouseInteraction={true}
+          mouseInfluence={2.0}
+        />
+      </div>
 
-      <div className="relative z-10 text-center max-w-3xl">
-        <div className="inline-block px-4 py-1.5 mb-6 rounded-full border border-[#00f2ff]/30 bg-[#00f2ff]/5 text-[#00f2ff] text-sm font-medium">
-          NOW IN PRIVATE BETA
+      {/* 2. Overlays */}
+      <div className="absolute inset-0 z-10 bg-black/30 pointer-events-none" />
+
+      {/* 3. Navbar */}
+      <Navbar />
+
+      {/* 4. Content Layer */}
+      <main className="relative z-20 flex flex-col items-center justify-center h-full px-4 text-center pointer-events-none">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-indigo-300 mb-8 backdrop-blur-sm pointer-events-auto">
+          <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          AI-Powered Scheduling
         </div>
-        
-        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6">
-          Interviewing <br />
-          <span className="text-[#00f2ff]">Reimagined.</span>
+
+        <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 text-white drop-shadow-2xl">
+          Hire at the speed <br/>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
+            of intelligence.
+          </span>
         </h1>
-
-        <p className="text-slate-400 text-lg mb-10 leading-relaxed max-w-xl mx-auto">
-          The AI-powered assistant that handles your scheduling, 
-          prep, and feedback in one seamless workflow.
+        
+        <p className="max-w-2xl text-lg md:text-xl text-gray-400 mb-10 drop-shadow-md leading-relaxed">
+          The autonomous engine that syncs calendars, screens candidates, 
+          and books interviews without a single email.
         </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            to="/login"
-            className="px-8 py-4 bg-[#00f2ff] hover:bg-[#00d8e4] text-[#020617] font-bold rounded-2xl transition-all shadow-lg shadow-[#00f2ff]/20"
+        
+        <div className="flex flex-col sm:flex-row gap-4 pointer-events-auto">
+          <button 
+            onClick={handleAuthRedirect}
+            className="px-10 py-4 bg-indigo-600 text-white font-bold rounded-full hover:bg-indigo-500 hover:scale-105 transition-all shadow-lg shadow-indigo-500/20"
           >
-            Get Started Free
-          </Link>
-          
-          <button className="px-8 py-4 bg-slate-900 border border-slate-800 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all">
-            Watch Demo
+            Get Started Now
           </button>
         </div>
-      </div>
+      </main>
+
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
     </div>
-  )
+  );
 }
