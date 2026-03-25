@@ -1,31 +1,92 @@
-import { AGENT_COLOR, AGENT_ICON, AGENT_LABEL } from '../../utils/agentMeta'
+// import { AGENT_COLOR, AGENT_ICON, AGENT_LABEL } from '../../utils/agentMeta'
+
+// function TimelineEntry({ entry, isLatest }) {
+//   const time = entry.time?.toLocaleTimeString([], {
+//     hour: '2-digit', minute: '2-digit', second: '2-digit'
+//   })
+
+//   return (
+//     <div className={`flex items-start gap-4 pl-1 transition-all duration-700 ${isLatest ? 'opacity-100 scale-100' : 'opacity-30 scale-95 grayscale'}`}>
+//       <div className={`relative z-10 w-6 h-6 rounded-lg flex items-center justify-center text-xs flex-shrink-0 mt-0.5 border transition-all ${
+//         isLatest
+//           ? 'bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-500/40 text-white'
+//           : 'bg-black/40 border-white/10 text-slate-500'
+//       }`}>
+//         {AGENT_ICON[entry.agent]}
+//       </div>
+
+//       <div className="flex flex-col gap-1 min-w-0">
+//         <span className={`text-[11px] font-bold uppercase tracking-wider ${isLatest ? 'text-white' : 'text-slate-500'}`}>
+//           {AGENT_LABEL[entry.agent]}
+//         </span>
+//         {entry.intent && (
+//           <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full w-fit border uppercase tracking-tighter ${
+//             isLatest ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'bg-white/5 border-white/10 text-slate-600'
+//           }`}>
+//             {entry.intent}
+//           </span>
+//         )}
+//         <span className="text-[9px] text-slate-700 font-mono font-bold uppercase tracking-widest">{time}</span>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default function Timeline({ agentTimeline }) {
+//   return (
+//     <div className="px-4 py-4">
+//       <div className="flex items-center gap-2 mb-6">
+//         <div className="w-1 h-3 bg-indigo-500 rounded-full" />
+//         <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Agent Activity Log</span>
+//       </div>
+
+//       {agentTimeline.length === 0 ? (
+//         <div className="flex flex-col items-center justify-center py-12 border border-dashed border-white/5 rounded-2xl">
+//           <span className="text-[10px] text-slate-700 font-bold uppercase tracking-widest">Awaiting Transition...</span>
+//         </div>
+//       ) : (
+//         <div className="relative">
+//           {/* Subtle connecting vertical line */}
+//           <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-indigo-500/50 via-white/5 to-transparent" />
+//           <div className="space-y-8">
+//             {agentTimeline.map((entry, idx) => (
+//               <TimelineEntry
+//                 key={idx}
+//                 entry={entry}
+//                 isLatest={idx === agentTimeline.length - 1}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
+
+
+
+
+
+
+
+import { AGENT_ICON, AGENT_LABEL } from '../../utils/agentMeta'
 
 function TimelineEntry({ entry, isLatest }) {
-  const time = entry.time?.toLocaleTimeString([], {
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  })
-
   return (
-    <div className={`flex items-start gap-3 pl-1 transition-opacity duration-300 ${isLatest ? 'opacity-100' : 'opacity-40'}`}>
-      {/* Dot */}
-      <div className={`relative z-10 w-5 h-5 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5 border ${
-        isLatest
-          ? 'bg-electric-500/20 border-electric-500/50'
-          : 'bg-navy-800 border-navy-700'
+    <div className={`flex items-start gap-4 pl-1 transition-all duration-500 ${isLatest ? 'opacity-100 scale-100' : 'opacity-30 scale-95 grayscale'}`}>
+      <div className={`relative z-10 w-6 h-6 rounded-lg flex items-center justify-center text-xs flex-shrink-0 mt-0.5 border ${
+        isLatest ? 'bg-indigo-600 border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)] text-white' : 'bg-black/40 border-white/10 text-slate-500'
       }`}>
         {AGENT_ICON[entry.agent]}
       </div>
-
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <span className={`text-xs font-display font-medium ${isLatest ? 'text-slate-200' : 'text-slate-500'}`}>
+      <div className="flex flex-col gap-1">
+        <span className={`text-[11px] font-bold uppercase tracking-wider ${isLatest ? 'text-white' : 'text-slate-500'}`}>
           {AGENT_LABEL[entry.agent]}
         </span>
-        {entry.intent && (
-          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded w-fit border ${AGENT_COLOR[entry.agent]}`}>
-            intent: {entry.intent}
-          </span>
-        )}
-        <span className="text-[9px] text-slate-700 font-mono">{time}</span>
+        <span className="text-[9px] text-slate-700 font-mono font-bold uppercase tracking-widest">
+          {entry.time?.toLocaleTimeString()}
+        </span>
       </div>
     </div>
   )
@@ -33,28 +94,16 @@ function TimelineEntry({ entry, isLatest }) {
 
 export default function Timeline({ agentTimeline }) {
   return (
-    <div className="px-4 py-3">
-      <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest block mb-4">
-        Agent Timeline
-      </span>
-
-      {agentTimeline.length === 0 ? (
-        <p className="text-xs text-slate-700 font-mono text-center py-6">No transitions yet</p>
-      ) : (
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-3.5 top-0 bottom-0 w-px bg-navy-700" />
-          <div className="space-y-4">
-            {agentTimeline.map((entry, idx) => (
-              <TimelineEntry
-                key={idx}
-                entry={entry}
-                isLatest={idx === agentTimeline.length - 1}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="px-4 py-4 relative">
+      <div className="flex items-center gap-2 mb-6 text-[10px] font-bold text-white uppercase tracking-[0.2em]">
+        <div className="w-1 h-3 bg-indigo-500 rounded-full" /> Activity Log
+      </div>
+      <div className="absolute left-[26px] top-16 bottom-8 w-[1px] bg-gradient-to-b from-indigo-500/50 via-white/5 to-transparent" />
+      <div className="space-y-8">
+        {agentTimeline.map((entry, idx) => (
+          <TimelineEntry key={idx} entry={entry} isLatest={idx === agentTimeline.length - 1} />
+        ))}
+      </div>
     </div>
   )
 }
