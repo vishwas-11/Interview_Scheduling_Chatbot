@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const client = axios.create({
-  baseURL: "http://localhost:8000", // FastAPI URL
+  baseURL: import.meta.env.VITE_API_URL, 
 })
 
 //  Attach token automatically
